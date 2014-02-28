@@ -7,22 +7,22 @@ serverPort = 9876
 serverSocket.bind(('',serverPort))
 serverSocket.listen(1)
 
-while True: 
-	#Establish the connection 
-	print('\n\nReady to serve...') 
-	connectionSocket, addr = serverSocket.accept() 
-	
+def processRequest( connectionSocket, addr ):
 	try:
 		print( "Waiting for a request..." )
 		
 		message = connectionSocket.recv(1024) 
 		print( "Got request..." )
+		
+		print( "Message: ", message )
+		if len( message ) >  0:
+			filename = message.split()[1] 
+			f = open(filename[1:]) 
+			outputdata = f.read()
+			print( "Read file: ", filename[1:] )
 
-		filename = message.split()[1] 
-		f = open(filename[1:]) 
-		outputdata = f.read()
-		print( "Read file: ", filename[1:] )
-
+		else:
+			raise IOError("No Message Data")
 		#Send one HTTP header line into socket 
 		connectionSocket.send( b"HTTP/1.1 200 OK \r\n" )
 		print( "Sent 200 OK response..." )
@@ -55,6 +55,15 @@ while True:
 		connectionSocket.close()
 		print( "Closed connectionSocket. 404" )
 	
+	
+
+while True: 
+	#Establish the connection 
+	print('\n\nReady to serve...') 
+	connectionSocket, addr = serverSocket.accept() 
+	processRequest( connectionSocket, addr )
+	
+		
 serverSocket.close() 	
 print( "Closed serverSocket. Goodbye." )
 
